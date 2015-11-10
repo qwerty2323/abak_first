@@ -1,0 +1,8 @@
+<ul>
+  <% pages.each do |page| %>
+    <li>
+      <p><%= link_to page.title, page_path(page.names) %></p>
+    </li>
+    <%= render 'pages', pages: page.children if page.has_children? %>
+  <% end %>
+</ul>

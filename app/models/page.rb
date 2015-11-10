@@ -12,18 +12,18 @@ class Page < ActiveRecord::Base
     path.map(&:name).join('/')
   end
 
-  def self.find_by_names(names)
+  def self.find_by_names(names) #Возвращает объект страницы по пути
     return nil if names.nil?
     last_name = names.split("/").last
     find_by_name(last_name)
   end
 
-  def self.find_id_by_names(names)
+  def self.find_id_by_names(names) #Возвращает id объекта страницы из строки пути
     return nil if names.nil?
     find_by_names(names).id
   end
 
-  def format_body
+  def format_body #Преобразует тэги в html тэги
     return nil if body.nil?
     bold_regexp = Regexp.new('\*\*(?<text>.+)\*\*')
     italic_regexp = Regexp.new('\\\\\\\\(?<text>.+)\\\\\\\\')

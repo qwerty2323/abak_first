@@ -1,19 +1,12 @@
 AbakFirst::Application.routes.draw do
-  get "pages/index"
+  match 'add', controller: 'pages', action: 'new_root', as: 'add_root_page'
+  match '/', controller: 'pages', action: 'create_root', via: :post
 
-  get "pages/show"
-
-  get "pages/new"
-
-  get "pages/new_root"
-
-  get "pages/create"
-
-  get "pages/create_root"
-
-  get "pages/edit"
-
-  get "pages/update"
+  match '*names/add', controller: 'pages', action: 'new', as: 'add_page'
+  match '*names/edit', controller: 'pages', action: 'edit', as: 'edit_page'
+  match '*names', controller: 'pages', action: 'show', as: 'page', via: :get
+  match '*names', controller: 'pages', action: 'create', via: :post
+  match '*names', controller: 'pages', action: 'update', via: :put
 
   root to: 'pages#index'
 end

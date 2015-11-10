@@ -1,61 +1,135 @@
 require 'rails_helper'
 
 RSpec.describe PagesController, :type => :controller do
+  describe "GET #show" do
+    let(:page) { create(:page, :with_two_children) }
+    before(:each) { get :show, names: page.names }
+
+    it "assigns the requested page to page" do
+      expect(assigns(:page)).to eq(page)
+    end
+
+    it "render the show template" do
+      expect(response).to render_template(:show)
+    end
+
+    it "assigns the children pages" do
+      expect(assigns(:pages)).to eq(page.children)
+    end
+  end
 
   describe "GET #index" do
-    it "returns http success" do
-      get :index
-      expect(response).to have_http_status(:success)
-    end
-  end
+    let(:page) { create(:page, :with_two_children) }
+    before(:each) { get :index }
 
-  describe "GET #show" do
-    it "returns http success" do
-      get :show
-      expect(response).to have_http_status(:success)
+    it "populates an array of all root pages" do
+      expect(assigns(:pages)).to eq(Page.roots)
     end
-  end
 
-  describe "GET #new" do
-    it "returns http success" do
-      get :new
-      expect(response).to have_http_status(:success)
+    it "render the index template" do
+      expect(response).to render_template(:index)
     end
   end
 
   describe "GET #new_root" do
-    it "returns http success" do
-      get :new_root
-      expect(response).to have_http_status(:success)
+    let(:page) { create(:page, :with_two_children) }
+    before(:each) { get :new_root }
+
+    it "assigns a new Page object to page" do
+      expect(assigns(:page)).to be_a_new(Page)
+    end
+
+    it "renders the new_root template" do
+      expect(response).to render_template(:new_root)
     end
   end
 
-  describe "GET #create" do
-    it "returns http success" do
-      get :create
-      expect(response).to have_http_status(:success)
-    end
-  end
+  describe "GET #new" do
+    let(:page) { create(:page, :with_two_children) }
+    before(:each) { get :new, names: page.names }
 
-  describe "GET #create_root" do
-    it "returns http success" do
-      get :create_root
-      expect(response).to have_http_status(:success)
+    it "assigns a new Page object to page" do
+      expect(assigns(:page)).to be_a_new(Page)
+    end
+
+    it "has parent id" do
+      expect(assigns(:page).parent_id).to eql(page.id)
     end
   end
 
   describe "GET #edit" do
-    it "returns http success" do
-      get :edit
-      expect(response).to have_http_status(:success)
+    let(:page) { create(:page, :with_two_children) }
+    before(:each) { get :edit, names: page.names }
+
+    it "assigns the requested page to page" do
+      expect(assigns(:page)).to eq(page)
+    end
+
+    it "render the edit template" do
+      expect(response).to render_template(:edit)
     end
   end
 
-  describe "GET #update" do
-    it "returns http success" do
-      get :update
-      expect(response).to have_http_status(:success)
+  describe "POST #create" do
+    before(:each) { @page = create(:page) }
+
+    it "saves the new page to db" do
+      expect {
+        post :create, names: @page.names, page: attributes_for(:page)
+      }.to change(Page, :count).by(1)
+    end
+
+    it "redirects to pages#show" do
+      post :create, names: @page.names, page: attributes_for(:page)
+      expect(response).to redirect_to page_path(names: assigns(:page).names)
     end
   end
 
+  describe "POST #create_root" do
+    it "saves the new page to db" do
+      expect {
+        post :create_root, page: attributes_for(:page)
+      }.to change(Page, :count).by(1)
+    end
+
+    it "redirects to pages#show" do
+      post :create_root, page: attributes_for(:page)
+      expect(response).to redirect_to page_path(names: assigns(:page).names)
+    end
+  end
+
+  describe "PUT #update" do
+    let(:page) { create(:page) }
+
+    context "with valid attributes" do
+      it "located the requested page" do
+        put :update, names: page.names, page: attributes_for(:page)
+        expect(assigns(:page)).to eq(page)
+      end
+
+      it "changes @page attributes" do
+        put :update, names: page.names, page: attributes_for(:page, title: "Test page")
+        page.reload
+        expect(page.title).to eql("Test page")
+      end
+
+      it "redirects to page" do
+        put :update, names: page.names, page: attributes_for(:page, title: "Test page")
+        expect(response).to redirect_to page_path(names: assigns(:page).names)
+      end
+    end
+
+    context "with invalid attributes" do
+      it "changes @page attributes" do
+        put :update, names: page.names, page: attributes_for(:page, title: "")
+        page.reload
+        expect(page.title).not_to eql("Test page")
+      end
+
+      it "render edit template" do
+        put :update, names: page.names, page: attributes_for(:page, title: "")
+        expect(response).to render_template(:edit)
+      end
+    end
+  end
 end
